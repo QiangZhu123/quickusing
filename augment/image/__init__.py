@@ -69,7 +69,7 @@ from .image.python.ops.image_ops import translate
 from .image.python.ops.image_ops import translations_to_projective_transforms
 from .image.python.ops.interpolate_spline import interpolate_spline
 from .image.python.ops.single_image_random_dot_stereograms import single_image_random_dot_stereograms
-from tensorflow.contrib.image.python.ops.sparse_image_warp import sparse_image_warp
+from .image.python.ops.sparse_image_warp import sparse_image_warp
 
 from tensorflow.python.util.all_util import remove_undocumented
 
