@@ -24,6 +24,10 @@ import inspect
 import math
 import tensorflow.compat.v1 as tf
 from tensorflow.contrib import image as contrib_image
+#from .image_ops import rotate
+#from .image_ops import transform
+#from .image_ops import translate
+
 from tensorflow.contrib import training as contrib_training
 
 
