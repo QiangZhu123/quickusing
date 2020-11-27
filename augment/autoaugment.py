@@ -23,7 +23,7 @@ from __future__ import print_function
 import inspect
 import math
 import tensorflow.compat.v1 as tf
-from tensorflow.contrib import image as contrib_image
+import .image as contrib_image
 #from .image_ops import rotate
 #from .image_ops import transform
 #from .image_ops import translate
