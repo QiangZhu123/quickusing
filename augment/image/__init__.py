@@ -52,23 +52,23 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from tensorflow.contrib.image.python.ops.dense_image_warp import dense_image_warp
+from .image.python.ops.dense_image_warp import dense_image_warp
 
-from tensorflow.contrib.image.python.ops.distort_image_ops import adjust_hsv_in_yiq
-from tensorflow.contrib.image.python.ops.distort_image_ops import random_hsv_in_yiq
+from .image.python.ops.distort_image_ops import adjust_hsv_in_yiq
+from .image.python.ops.distort_image_ops import random_hsv_in_yiq
 
-from tensorflow.contrib.image.python.ops.image_ops import angles_to_projective_transforms
-from tensorflow.contrib.image.python.ops.image_ops import bipartite_match
-from tensorflow.contrib.image.python.ops.image_ops import compose_transforms
-from tensorflow.contrib.image.python.ops.image_ops import connected_components
-from tensorflow.contrib.image.python.ops.image_ops import flat_transforms_to_matrices
-from tensorflow.contrib.image.python.ops.image_ops import matrices_to_flat_transforms
-from tensorflow.contrib.image.python.ops.image_ops import rotate
-from tensorflow.contrib.image.python.ops.image_ops import transform
-from tensorflow.contrib.image.python.ops.image_ops import translate
-from tensorflow.contrib.image.python.ops.image_ops import translations_to_projective_transforms
-from tensorflow.contrib.image.python.ops.interpolate_spline import interpolate_spline
-from tensorflow.contrib.image.python.ops.single_image_random_dot_stereograms import single_image_random_dot_stereograms
+from .image.python.ops.image_ops import angles_to_projective_transforms
+from .image.python.ops.image_ops import bipartite_match
+from .image.python.ops.image_ops import compose_transforms
+from .image.python.ops.image_ops import connected_components
+from .image.python.ops.image_ops import flat_transforms_to_matrices
+from .image.python.ops.image_ops import matrices_to_flat_transforms
+from .image.python.ops.image_ops import rotate
+from .image.python.ops.image_ops import transform
+from .image.python.ops.image_ops import translate
+from .image.python.ops.image_ops import translations_to_projective_transforms
+from .image.python.ops.interpolate_spline import interpolate_spline
+from .image.python.ops.single_image_random_dot_stereograms import single_image_random_dot_stereograms
 from tensorflow.contrib.image.python.ops.sparse_image_warp import sparse_image_warp
 
 from tensorflow.python.util.all_util import remove_undocumented
