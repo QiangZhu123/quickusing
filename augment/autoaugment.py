@@ -23,12 +23,12 @@ from __future__ import print_function
 import inspect
 import math
 import tensorflow.compat.v1 as tf
-import .image as contrib_image
+import augment.image as contrib_image
 #from .image_ops import rotate
 #from .image_ops import transform
 #from .image_ops import translate
 
-from .training as contrib_training
+import augment.training as contrib_training
 
 
 # This signifies the max integer that the controller RNN could predict for the
