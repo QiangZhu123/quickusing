@@ -220,17 +220,17 @@ def posterize(image, bits):
 
 
 def rotate(image, degrees):
-    return tfa.image.rotate(image,degrees)
+  return tfa.image.rotate(image,degrees)
 
 
 def translate_x(image, pixels, replace):
   """Equivalent of PIL Translate in X dimension."""
-    return tfa.image.translate_xy(image,[pixels,0],replace)
+  return tfa.image.translate_xy(image,[pixels,0],replace)
 
 
 def translate_y(image, pixels, replace):
   """Equivalent of PIL Translate in Y dimension."""
-    return tfa.image.translate_xy(image,[0,pixels],replace)
+  return tfa.image.translate_xy(image,[0,pixels],replace)
 
 
 def shear_x(image, level, replace):
@@ -239,7 +239,7 @@ def shear_x(image, level, replace):
   # with a matrix form of:
   # [1  level
   #  0  1].
-    return tfa.image.shear_x(image,level,replace)
+  return tfa.image.shear_x(image,level,replace)
 
 
 def shear_y(image, level, replace):
@@ -248,7 +248,7 @@ def shear_y(image, level, replace):
   # with a matrix form of:
   # [1  0
   #  level  1].
-    return tfa.image.shear_y(image,level,replace)
+  return tfa.image.shear_y(image,level,replace)
 
 def autocontrast(image):
   """Implements Autocontrast function from PIL using TF ops.
