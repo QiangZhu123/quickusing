@@ -23,10 +23,7 @@ from __future__ import print_function
 import inspect
 import math
 import tensorflow.compat.v1 as tf
-import augment.image as contrib_image
-#from .image_ops import rotate
-#from .image_ops import transform
-#from .image_ops import translate
+import tensorflow_addons as tfa
 
 import augment.training as contrib_training
 
@@ -222,39 +219,18 @@ def posterize(image, bits):
   return tf.bitwise.left_shift(tf.bitwise.right_shift(image, shift), shift)
 
 
-def rotate(image, degrees, replace):
-  """Rotates the image by degrees either clockwise or counterclockwise.
-  Args:
-    image: An image Tensor of type uint8.
-    degrees: Float, a scalar angle in degrees to rotate all images by. If
-      degrees is positive the image will be rotated clockwise otherwise it will
-      be rotated counterclockwise.
-    replace: A one or three value 1D tensor to fill empty pixels caused by
-      the rotate operation.
-  Returns:
-    The rotated version of image.
-  """
-  # Convert from degrees to radians.
-  degrees_to_radians = math.pi / 180.0
-  radians = degrees * degrees_to_radians
-
-  # In practice, we should randomize the rotation degrees by flipping
-  # it negatively half the time, but that's done on 'degrees' outside
-  # of the function.
-  image = contrib_image.rotate(wrap(image), radians)
-  return unwrap(image, replace)
+def rotate(image, degrees):
+    return tfa.image.rotate(image,degrees)
 
 
 def translate_x(image, pixels, replace):
   """Equivalent of PIL Translate in X dimension."""
-  image = contrib_image.translate(wrap(image), [-pixels, 0])
-  return unwrap(image, replace)
+    return tfa.image.translate_xy(image,[pixels,0],replace)
 
 
 def translate_y(image, pixels, replace):
   """Equivalent of PIL Translate in Y dimension."""
-  image = contrib_image.translate(wrap(image), [0, -pixels])
-  return unwrap(image, replace)
+    return tfa.image.translate_xy(image,[0,pixels],replace)
 
 
 def shear_x(image, level, replace):
@@ -263,9 +239,7 @@ def shear_x(image, level, replace):
   # with a matrix form of:
   # [1  level
   #  0  1].
-  image = contrib_image.transform(
-      wrap(image), [1., level, 0., 0., 1., 0., 0., 0.])
-  return unwrap(image, replace)
+    return tfa.image.shear_x(image,level,replace)
 
 
 def shear_y(image, level, replace):
@@ -274,10 +248,7 @@ def shear_y(image, level, replace):
   # with a matrix form of:
   # [1  0
   #  level  1].
-  image = contrib_image.transform(
-      wrap(image), [1., 0., 0., level, 1., 0., 0., 0.])
-  return unwrap(image, replace)
-
+    return tfa.image.shear_y(image,level,replace)
 
 def autocontrast(image):
   """Implements Autocontrast function from PIL using TF ops.
