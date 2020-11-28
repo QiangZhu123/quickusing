@@ -45,27 +45,27 @@ from __future__ import division
 from __future__ import print_function
 
 # pylint: disable=unused-import,wildcard-import
-from tensorflow.contrib.training.python.training.bucket_ops import *
-from tensorflow.contrib.training.python.training.device_setter import *
-from tensorflow.contrib.training.python.training.evaluation import checkpoints_iterator
-from tensorflow.contrib.training.python.training.evaluation import evaluate_once
-from tensorflow.contrib.training.python.training.evaluation import evaluate_repeatedly
-from tensorflow.contrib.training.python.training.evaluation import get_or_create_eval_step
-from tensorflow.contrib.training.python.training.evaluation import StopAfterNEvalsHook
-from tensorflow.contrib.training.python.training.evaluation import SummaryAtEndHook
-from tensorflow.contrib.training.python.training.evaluation import wait_for_new_checkpoint
-from tensorflow.contrib.training.python.training.feeding_queue_runner import FeedingQueueRunner
-from tensorflow.contrib.training.python.training.hparam import *
-from tensorflow.contrib.training.python.training.resample import *
-from tensorflow.contrib.training.python.training.sampling_ops import *
-from tensorflow.contrib.training.python.training.sequence_queueing_state_saver import *
-from tensorflow.contrib.training.python.training.training import add_gradients_summaries
-from tensorflow.contrib.training.python.training.training import clip_gradient_norms
-from tensorflow.contrib.training.python.training.training import clip_gradient_norms_fn
-from tensorflow.contrib.training.python.training.training import create_train_op
-from tensorflow.contrib.training.python.training.training import multiply_gradients
-from tensorflow.contrib.training.python.training.training import train
-from tensorflow.contrib.training.python.training.tuner import Tuner
+from augment.training.python.training.bucket_ops import *
+from augment.training.python.training.device_setter import *
+from augment.training.python.training.evaluation import checkpoints_iterator
+from augment.training.python.training.evaluation import evaluate_once
+from augment.training.python.training.evaluation import evaluate_repeatedly
+from augment.training.python.training.evaluation import get_or_create_eval_step
+from augment.training.python.training.evaluation import StopAfterNEvalsHook
+from augment.training.python.training.evaluation import SummaryAtEndHook
+from augment.training.python.training.evaluation import wait_for_new_checkpoint
+from augment.training.python.training.feeding_queue_runner import FeedingQueueRunner
+from augment.training.python.training.hparam import *
+from augment.training.python.training.resample import *
+from augment.training.python.training.sampling_ops import *
+from augment.training.python.training.sequence_queueing_state_saver import *
+from augment.training.python.training.training import add_gradients_summaries
+from augment.training.python.training.training import clip_gradient_norms
+from augment.training.python.training.training import clip_gradient_norms_fn
+from augment.training.python.training.training import create_train_op
+from augment.training.python.training.training import multiply_gradients
+from augment.training.python.training.training import train
+from augment.training.python.training.tuner import Tuner
 # pylint: enable=unused-import,wildcard-import
 
 from tensorflow.python.util.all_util import remove_undocumented
