@@ -6288,3 +6288,437 @@ def dismantle_graph(graph):
   """Cleans up reference cycles from a `Graph`.
 
   Helpful for making sure the garbage collector doesn't need to run after a
+ temporary `Graph` is no longer needed.
+
+  Args:
+    graph: A `Graph` object to destroy. Neither it nor any of its ops are usable
+      after this function runs.
+  """
+  memory.dismantle_ordered_dict(graph._functions)  # pylint: disable=protected-access
+
+  # Now clean up Operation<->Graph reference cycles by clearing all of the
+  # attributes for the Graph and its ops.
+  graph_operations = graph.get_operations()
+  for op in graph_operations:
+    op.__dict__ = {}
+  graph.__dict__ = {}
+
+
+@tf_export(v1=["add_to_collection"])
+def add_to_collection(name, value):
+  """Wrapper for `Graph.add_to_collection()` using the default graph.
+
+  See `tf.Graph.add_to_collection`
+  for more details.
+
+  Args:
+    name: The key for the collection. For example, the `GraphKeys` class
+      contains many standard names for collections.
+    value: The value to add to the collection.  @compatibility(eager)
+      Collections are only supported in eager when variables are created inside
+      an EagerVariableStore (e.g. as part of a layer or template).
+      @end_compatibility
+  """
+  get_default_graph().add_to_collection(name, value)
+
+
+@tf_export(v1=["add_to_collections"])
+def add_to_collections(names, value):
+  """Wrapper for `Graph.add_to_collections()` using the default graph.
+
+  See `tf.Graph.add_to_collections`
+  for more details.
+
+  Args:
+    names: The key for the collections. The `GraphKeys` class contains many
+      standard names for collections.
+    value: The value to add to the collections.  @compatibility(eager)
+      Collections are only supported in eager when variables are created inside
+      an EagerVariableStore (e.g. as part of a layer or template).
+      @end_compatibility
+  """
+  get_default_graph().add_to_collections(names, value)
+
+
+@tf_export(v1=["get_collection_ref"])
+def get_collection_ref(key):
+  """Wrapper for `Graph.get_collection_ref()` using the default graph.
+
+  See `tf.Graph.get_collection_ref`
+  for more details.
+
+  Args:
+    key: The key for the collection. For example, the `GraphKeys` class contains
+      many standard names for collections.
+
+  Returns:
+    The list of values in the collection with the given `name`, or an empty
+    list if no value has been added to that collection.  Note that this returns
+    the collection list itself, which can be modified in place to change the
+    collection.
+
+  @compatibility(eager)
+  Collections are not supported when eager execution is enabled.
+  @end_compatibility
+  """
+  return get_default_graph().get_collection_ref(key)
+
+
+@tf_export(v1=["get_collection"])
+def get_collection(key, scope=None):
+  """Wrapper for `Graph.get_collection()` using the default graph.
+
+  See `tf.Graph.get_collection`
+  for more details.
+
+  Args:
+    key: The key for the collection. For example, the `GraphKeys` class contains
+      many standard names for collections.
+    scope: (Optional.) If supplied, the resulting list is filtered to include
+      only items whose `name` attribute matches using `re.match`. Items without
+      a `name` attribute are never returned if a scope is supplied and the
+      choice or `re.match` means that a `scope` without special tokens filters
+      by prefix.
+
+  Returns:
+    The list of values in the collection with the given `name`, or
+    an empty list if no value has been added to that collection. The
+    list contains the values in the order under which they were
+    collected.
+
+  @compatibility(eager)
+  Collections are not supported when eager execution is enabled.
+  @end_compatibility
+  """
+  return get_default_graph().get_collection(key, scope)
+
+
+def get_all_collection_keys():
+  """Returns a list of collections used in the default graph."""
+  return get_default_graph().get_all_collection_keys()
+
+
+name_scope_cache = {}
+
+
+# Named like a function for backwards compatibility with the
+# @tf_contextlib.contextmanager version, which was switched to a class to avoid
+# some object creation overhead.
+@tf_export(v1=["name_scope"])
+class name_scope(object):  # pylint: disable=invalid-name
+  """A context manager for use when defining a Python op.
+
+  This context manager validates that the given `values` are from the
+  same graph, makes that graph the default graph, and pushes a
+  name scope in that graph (see
+  `tf.Graph.name_scope`
+  for more details on that).
+
+  For example, to define a new Python op called `my_op`:
+
+  ```python
+  def my_op(a, b, c, name=None):
+    with tf.name_scope(name, "MyOp", [a, b, c]) as scope:
+      a = tf.convert_to_tensor(a, name="a")
+      b = tf.convert_to_tensor(b, name="b")
+      c = tf.convert_to_tensor(c, name="c")
+      # Define some computation that uses `a`, `b`, and `c`.
+      return foo_op(..., name=scope)
+  ```
+  """
+
+  @property
+  def name(self):
+    return self._name
+
+  def __init__(self, name, default_name=None, values=None):
+    """Initialize the context manager.
+
+    Args:
+      name: The name argument that is passed to the op function.
+      default_name: The default name to use if the `name` argument is `None`.
+      values: The list of `Tensor` arguments that are passed to the op function.
+
+    Raises:
+      TypeError: if `default_name` is passed in but not a string.
+    """
+    if not (default_name is None or isinstance(default_name, six.string_types)):
+      raise TypeError(
+          "`default_name` type (%s) is not a string type. You likely meant to "
+          "pass this into the `values` kwarg." % type(default_name))
+    self._name = default_name if name is None else name
+    self._default_name = default_name
+    self._values = values
+    self._ctx = context.context()
+    self._in_eager_mode = self._ctx.executing_eagerly()
+    self._has_symbolic_input_in_eager = False
+    if self._values and self._in_eager_mode:
+      # The presence of a graph tensor in `self._values` overrides the context.
+      for value in self._values:
+        if hasattr(value, "graph"):
+          self._has_symbolic_input_in_eager = True
+          self._name_scope = value.graph.name_scope(self._name)
+
+  def __enter__(self):
+    """Start the scope block.
+
+    Returns:
+      The scope name.
+
+    Raises:
+      ValueError: if neither `name` nor `default_name` is provided
+        but `values` are.
+    """
+    if self._has_symbolic_input_in_eager:
+      return self._name_scope.__enter__()
+
+    if self._in_eager_mode:
+      self._old_name = self._ctx.scope_name
+      if not self._name:
+        scope_name = ""
+      else:
+        cache_key = self._name, self._old_name, self._default_name
+        if cache_key in name_scope_cache:
+          self._ctx.scope_name = name_scope_cache[cache_key]
+          return self._ctx.scope_name
+        elif self._name[-1] == "/":
+          # A trailing slash breaks out of nested name scopes, indicating a
+          # fully specified scope name, for compatibility with Graph.name_scope.
+          scope_name = self._name
+        else:
+          name_with_trailing_slash = self._name + "/"
+          scope_name = (
+              self._old_name + name_with_trailing_slash
+              if self._old_name else name_with_trailing_slash)
+        name_scope_cache[cache_key] = scope_name
+      self._ctx.scope_name = scope_name
+      return scope_name
+    else:
+      if self._name is None and self._values is not None:
+        # We only raise an error if values is not None (provided) because
+        # currently tf.name_scope(None) (values=None then) is sometimes used as
+        # an idiom to reset to top scope.
+        raise ValueError(
+            "At least one of name (%s) and default_name (%s) must be provided."
+            % (self._name, self._default_name))
+      if self._values is None:
+        self._values = []
+      g = _get_graph_from_inputs(self._values)
+      self._g_manager = g.as_default()
+      self._g_manager.__enter__()
+      try:
+        self._name_scope = g.name_scope(self._name)
+        return self._name_scope.__enter__()
+      except:
+        self._g_manager.__exit__(*sys.exc_info())
+        raise
+
+  def __exit__(self, type_arg, value_arg, traceback_arg):
+    if self._has_symbolic_input_in_eager:
+      self._name_scope.__exit__(type_arg, value_arg, traceback_arg)
+    elif self._in_eager_mode:
+      self._ctx.scope_name = self._old_name
+    else:
+      self._name_scope.__exit__(type_arg, value_arg, traceback_arg)
+      self._g_manager.__exit__(type_arg, value_arg, traceback_arg)
+    return False  # False values do not suppress exceptions
+
+
+@tf_export("name_scope", v1=[])
+class name_scope_v2(name_scope):
+  """A context manager for use when defining a Python op.
+
+  This context manager pushes a name scope, which will make the name of all
+  operations added within it have a prefix.
+
+  For example, to define a new Python op called `my_op`:
+
+  ```python
+  def my_op(a, b, c, name=None):
+    with tf.name_scope("MyOp") as scope:
+      a = tf.convert_to_tensor(a, name="a")
+      b = tf.convert_to_tensor(b, name="b")
+      c = tf.convert_to_tensor(c, name="c")
+      # Define some computation that uses `a`, `b`, and `c`.
+      return foo_op(..., name=scope)
+  ```
+
+  When executed, the Tensors `a`, `b`, `c`, will have names `MyOp/a`, `MyOp/b`,
+  and `MyOp/c`.
+
+  If the scope name already exists, the name will be made unique by appending
+  `_n`. For example, calling `my_op` the second time will generate `MyOp_1/a`,
+  etc.
+  """
+
+  def __init__(self, name):
+    """Initialize the context manager.
+
+    Args:
+      name: The prefix to use on all names created within the name scope.
+
+    Raises:
+      ValueError: If name is None, or not a string.
+    """
+    if name is None or not isinstance(name, six.string_types):
+      raise ValueError("name for name_scope must be a string.")
+    super(name_scope_v2, self).__init__(name=None, default_name=name)
+
+
+def strip_name_scope(name, export_scope):
+  """Removes name scope from a name.
+
+  Args:
+    name: A `string` name.
+    export_scope: Optional `string`. Name scope to remove.
+
+  Returns:
+    Name with name scope removed, or the original name if export_scope
+    is None.
+  """
+  if export_scope:
+    if export_scope[-1] == "/":
+      export_scope = export_scope[:-1]
+
+    try:
+      # Strips export_scope/, export_scope///,
+      # ^export_scope/, loc:@export_scope/.
+      str_to_replace = r"([\^]|loc:@|^)" + export_scope + r"[\/]+(.*)"
+      return re.sub(str_to_replace, r"\1\2", compat.as_str(name), count=1)
+    except TypeError as e:
+      # If the name is not of a type we can process, simply return it.
+      logging.warning(e)
+      return name
+  else:
+    return name
+
+
+def prepend_name_scope(name, import_scope):
+  """Prepends name scope to a name.
+
+  Args:
+    name: A `string` name.
+    import_scope: Optional `string`. Name scope to add.
+
+  Returns:
+    Name with name scope added, or the original name if import_scope
+    is None.
+  """
+  if import_scope:
+    if import_scope[-1] == "/":
+      import_scope = import_scope[:-1]
+
+    try:
+      str_to_replace = r"([\^]|loc:@|^)(.*)"
+      return re.sub(str_to_replace, r"\1" + import_scope + r"/\2",
+                    compat.as_str(name))
+    except TypeError as e:
+      # If the name is not of a type we can process, simply return it.
+      logging.warning(e)
+      return name
+  else:
+    return name
+
+
+# pylint: disable=g-doc-return-or-yield
+# pylint: disable=not-context-manager
+@tf_export(v1=["op_scope"])
+@tf_contextlib.contextmanager
+def op_scope(values, name, default_name=None):
+  """DEPRECATED. Same as name_scope above, just different argument order."""
+  logging.warn("tf.op_scope(values, name, default_name) is deprecated,"
+               " use tf.name_scope(name, default_name, values)")
+  with name_scope(name, default_name=default_name, values=values) as scope:
+    yield scope
+
+
+_proto_function_registry = registry.Registry("proto functions")
+
+
+def register_proto_function(collection_name,
+                            proto_type=None,
+                            to_proto=None,
+                            from_proto=None):
+  """Registers `to_proto` and `from_proto` functions for collection_name.
+
+  `to_proto` function converts a Python object to the corresponding protocol
+  buffer, and returns the protocol buffer.
+
+  `from_proto` function converts protocol buffer into a Python object, and
+  returns the object..
+
+  Args:
+    collection_name: Name of the collection.
+    proto_type: Protobuf type, such as `saver_pb2.SaverDef`,
+      `variable_pb2.VariableDef`, `queue_runner_pb2.QueueRunnerDef`..
+    to_proto: Function that implements Python object to protobuf conversion.
+    from_proto: Function that implements protobuf to Python object conversion.
+  """
+  if to_proto and not callable(to_proto):
+    raise TypeError("to_proto must be callable.")
+  if from_proto and not callable(from_proto):
+    raise TypeError("from_proto must be callable.")
+
+  _proto_function_registry.register((proto_type, to_proto, from_proto),
+                                    collection_name)
+
+
+def get_collection_proto_type(collection_name):
+  """Returns the proto_type for collection_name."""
+  try:
+    return _proto_function_registry.lookup(collection_name)[0]
+  except LookupError:
+    return None
+
+
+def get_to_proto_function(collection_name):
+  """Returns the to_proto function for collection_name."""
+  try:
+    return _proto_function_registry.lookup(collection_name)[1]
+  except LookupError:
+    return None
+
+
+def get_from_proto_function(collection_name):
+  """Returns the from_proto function for collection_name."""
+  try:
+    return _proto_function_registry.lookup(collection_name)[2]
+  except LookupError:
+    return None
+
+
+def _operation_conversion_error(op, dtype=None, name=None, as_ref=False):
+  """Produce a nice error if someone converts an Operation to a Tensor."""
+  raise TypeError(("Can't convert Operation '%s' to Tensor "
+                   "(target dtype=%r, name=%r, as_ref=%r)") %
+                  (op.name, dtype, name, as_ref))
+
+
+def _op_to_colocate_with(v):
+  """Operation object corresponding to v to use for colocation constraints."""
+  if v is None:
+    return None
+  if isinstance(v, Operation):
+    return v
+  # We always want to colocate with the reference op.
+  # When 'v' is a ResourceVariable, the reference op is the handle creating op.
+  #
+  # What this should be is:
+  # if isinstance(v, ResourceVariable):
+  #   return v.handle.op
+  # However, that would require a circular import dependency.
+  # As of October 2018, there were attempts underway to remove
+  # colocation constraints altogether. Assuming that will
+  # happen soon, perhaps this hack to work around the circular
+  # import dependency is acceptable.
+  if hasattr(v, "handle") and hasattr(v.handle, "op") and isinstance(
+      v.handle.op, Operation):
+    return v.handle.op
+  return internal_convert_to_tensor_or_indexed_slices(v, as_ref=True).op
+
+
+def _is_keras_symbolic_tensor(x):
+  return hasattr(x, "graph") and getattr(x.graph, "name", None) == "keras_graph"
+
+
+register_tensor_conversion_function(Operation, _operation_conversion_error)
