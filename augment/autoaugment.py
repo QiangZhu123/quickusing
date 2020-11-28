@@ -25,8 +25,6 @@ import math
 import tensorflow.compat.v1 as tf
 import tensorflow_addons as tfa
 
-import augment.training as contrib_training
-
 
 # This signifies the max integer that the controller RNN could predict for the
 # augmentation scheme.
@@ -615,8 +613,7 @@ def distort_image_with_autoaugment(image, augmentation_name):
 
   policy = available_policies[augmentation_name]()
   # Hparams that will be used for AutoAugment.
-  augmentation_hparams = contrib_training.HParams(
-      cutout_const=100, translate_const=250)
+  augmentation_hparams = dict(cutout_const=100, translate_const=250)
 
   return build_and_apply_nas_policy(policy, image, augmentation_hparams)
 
@@ -637,8 +634,7 @@ def distort_image_with_randaugment(image, num_layers, magnitude):
   """
   replace_value = [128] * 3
   tf.logging.info('Using RandAug.')
-  augmentation_hparams = contrib_training.HParams(
-      cutout_const=40, translate_const=100)
+  augmentation_hparams = dict(cutout_const=40, translate_const=100)
   available_ops = [
       'AutoContrast', 'Equalize', 'Invert', 'Rotate', 'Posterize',
       'Solarize', 'Color', 'Contrast', 'Brightness', 'Sharpness',
