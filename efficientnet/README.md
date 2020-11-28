@@ -17,6 +17,10 @@ model = efn.EfficientNetB0(include_top=True,
 PYTORCH版本
 =======
 ```
+!pip install efficientnet_pytorch
+
+from efficientnet_pytorch import EfficientNet
+model = EfficientNet.from_pretrained('efficientnet-b0')
 ```
 
 
