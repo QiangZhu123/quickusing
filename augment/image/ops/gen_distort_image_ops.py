@@ -19,7 +19,7 @@ from tensorflow.core.framework import op_def_pb2 as _op_def_pb2
 # Needed to trigger the call to _set_call_cpp_shape_fn.
 from tensorflow.python.framework import common_shapes as _common_shapes
 from tensorflow.python.framework import op_def_registry as _op_def_registry
-from tensorflow.python.framework import ops as _ops
+from augment import ops as _ops
 from tensorflow.python.framework import op_def_library as _op_def_library
 from tensorflow.python.util.deprecation import deprecated_endpoints
 from tensorflow.python.util import dispatch as _dispatch
