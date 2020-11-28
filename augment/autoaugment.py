@@ -477,12 +477,12 @@ def level_to_arg(hparams):
       'Sharpness': _enhance_level_to_arg,
       'ShearX': _shear_level_to_arg,
       'ShearY': _shear_level_to_arg,
-      'Cutout': lambda level: (int((level/_MAX_LEVEL) * hparams.cutout_const),),
+      'Cutout': lambda level: (int((level/_MAX_LEVEL) * hparams['cutout_const']),),
       # pylint:disable=g-long-lambda
       'TranslateX': lambda level: _translate_level_to_arg(
-          level, hparams.translate_const),
+          level, hparams['translate_const']),
       'TranslateY': lambda level: _translate_level_to_arg(
-          level, hparams.translate_const),
+          level, hparams['translate_const']),
       # pylint:enable=g-long-lambda
   }
 
