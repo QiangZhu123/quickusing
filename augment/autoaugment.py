@@ -28,7 +28,7 @@ import .image as contrib_image
 #from .image_ops import transform
 #from .image_ops import translate
 
-from tensorflow.contrib import training as contrib_training
+from .training as contrib_training
 
 
 # This signifies the max integer that the controller RNN could predict for the
