@@ -1,3 +1,13 @@
+TENSORFLOW版本
+
+
+
+
+
+
+
+
+PYTORCH版本
 !git clone https://github.com/DeepVoltaire/AutoAugment
 
 from AutoAugment.autoaugment import ImageNetPolicy
