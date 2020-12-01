@@ -22,7 +22,7 @@ from __future__ import print_function
 
 import inspect
 import math
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tensorflow_addons as tfa
 
 
@@ -172,13 +172,13 @@ def solarize(image, threshold=128):
   return tf.where(image < threshold, image, 255 - image)
 
 
-def solarize_add(image, addition=0, threshold=128):
+def solarize_add(image, addition=0.0, threshold=128):
   # For each pixel in the image less than threshold
   # we add 'addition' amount to it and then clip the
   # pixel value to be between 0 and 255. The value
   # of 'addition' is between -128 and 128.
-  added_image = tf.cast(image, tf.int64) + addition
-  added_image = tf.cast(tf.clip_by_value(added_image, 0, 255), tf.float32)
+  added_image = tf.cast(image, tf.float32) + addition
+  added_image = tf.cast(tf.clip_by_value(added_image, 0.0, 255.0), tf.float32)
   return tf.where(image < threshold, added_image, image)
 
 
@@ -192,7 +192,7 @@ def contrast(image, factor):
   """Equivalent of PIL Contrast."""
   degenerate = tf.image.rgb_to_grayscale(image)
   # Cast before calling tf.histogram.
-  degenerate = tf.cast(degenerate, tf.int32)
+  degenerate = tf.cast(degenerate, tf.float32)
 
   # Compute the grayscale histogram, then compute the mean pixel value,
   # and create a constant image size of that value.  Use that as the
@@ -293,8 +293,8 @@ def sharpness(image, factor):
   image = tf.expand_dims(image, 0)
   # SMOOTH PIL Kernel.
   kernel = tf.constant(
-      [[1, 1, 1], [1, 5, 1], [1, 1, 1]], dtype=tf.float32,
-      shape=[3, 3, 1, 1]) / 13.
+      [[1.0, 1.0, 1.0], [1.0, 5.0, 1.0], [1.0, 1.0, 1.0]], dtype=tf.float32,
+      shape=[3, 3, 1, 1]) / 13.0
   # Tile across channel dimension.
   kernel = tf.tile(kernel, [1, 1, 3, 1])
   strides = [1, 1, 1, 1]
@@ -318,7 +318,7 @@ def equalize(image):
   """Implements Equalize function from PIL using TF ops."""
   def scale_channel(im, c):
     """Scale the data in the channel to implement equalize."""
-    im = tf.cast(im[:, :, c], tf.int32)
+    im = tf.cast(im[:, :, c], tf.float32)
     # Compute the histogram of the image channel.
     histo = tf.histogram_fixed_width(im, [0, 255], nbins=256)
 
@@ -335,7 +335,7 @@ def equalize(image):
       lut = tf.concat([[0], lut[:-1]], 0)
       # Clip the counts to be in range.  This is done
       # in the C code for image.point.
-      return tf.clip_by_value(lut, 0, 255)
+      return tf.clip_by_value(lut, 0.0, 255.0)
 
     # If step is zero, return the original image.  Otherwise, build
     # lut from the full histogram and step and then index from it.
@@ -357,7 +357,7 @@ def equalize(image):
 def invert(image):
   """Inverts the image pixels."""
   image = tf.convert_to_tensor(image)
-  return 255 - image
+  return 255.0 - image
 
 
 def wrap(image):
