@@ -137,11 +137,11 @@ def cutout(image, pad_size, replace=0):
   image_width = tf.shape(image)[1]
 
   # Sample the center location in the image where the zero mask will be applied.
-  cutout_center_height = tf.random_uniform(
+  cutout_center_height = tf.random.uniform(
       shape=[], minval=0, maxval=image_height,
       dtype=tf.int32)
 
-  cutout_center_width = tf.random_uniform(
+  cutout_center_width = tf.random.uniform(
       shape=[], minval=0, maxval=image_width,
       dtype=tf.int32)
 
@@ -424,7 +424,7 @@ NAME_TO_FUNC = {
 
 def _randomly_negate_tensor(tensor):
   """With 50% prob turn the tensor negative."""
-  should_flip = tf.cast(tf.floor(tf.random_uniform([]) + 0.5), tf.bool)
+  should_flip = tf.cast(tf.floor(tf.random.uniform([]) + 0.5), tf.bool)
   final_tensor = tf.cond(should_flip, lambda: tensor, lambda: -tensor)
   return final_tensor
 
@@ -523,7 +523,7 @@ def _apply_func_with_prob(func, image, args, prob):
 
   # Apply the function with probability `prob`.
   should_apply_op = tf.cast(
-      tf.floor(tf.random_uniform([], dtype=tf.float32) + prob), tf.bool)
+      tf.floor(tf.random.uniform([], dtype=tf.float32) + prob), tf.bool)
   augmented_image = tf.cond(
       should_apply_op,
       lambda: func(image, *args),
@@ -533,7 +533,7 @@ def _apply_func_with_prob(func, image, args, prob):
 
 def select_and_apply_random_policy(policies, image):
   """Select a random policy from `policies` and apply it to `image`."""
-  policy_to_select = tf.random_uniform([], maxval=len(policies), dtype=tf.int32)
+  policy_to_select = tf.random.uniform([], maxval=len(policies), dtype=tf.int32)
   # Note that using tf.case instead of tf.conds would result in significantly
   # larger graphs and would even break export for some larger policies.
   for (i, policy) in enumerate(policies):
@@ -644,12 +644,12 @@ def distort_image_with_randaugment(image, num_layers, magnitude,policy=None):
     available_ops = policy
   
   for layer_num in range(num_layers):
-    op_to_select = tf.random_uniform(
+    op_to_select = tf.random.uniform(
         [], maxval=len(available_ops), dtype=tf.int32)
     random_magnitude = float(magnitude)
     with tf.name_scope('randaug_layer_{}'.format(layer_num)):
       for (i, op_name) in enumerate(available_ops):
-        prob = tf.random_uniform([], minval=0.2, maxval=0.8, dtype=tf.float32)
+        prob = tf.random.uniform([], minval=0.2, maxval=0.8, dtype=tf.float32)
         func, _, args = _parse_policy_info(op_name, prob, random_magnitude,
                                            replace_value, augmentation_hparams)
         image = tf.cond(
