@@ -114,7 +114,7 @@ def blend(image1, image2, factor):
   # Extrapolate:
   #
   # We need to clip and then cast.
-  return tf.cast(tf.clip_by_value(temp, 0.0, 255.0), tf.float32)
+  return tf.cast(tf.clip_by_value(temp, 0, 255), tf.float32)
 
 
 def cutout(image, pad_size, replace=0):
@@ -178,7 +178,7 @@ def solarize_add(image, addition=0.0, threshold=128):
   # pixel value to be between 0 and 255. The value
   # of 'addition' is between -128 and 128.
   added_image = tf.cast(image, tf.float32) + addition
-  added_image = tf.cast(tf.clip_by_value(added_image, 0.0, 255.0), tf.float32)
+  added_image = tf.cast(tf.clip_by_value(added_image, 0, 255), tf.float32)
   return tf.where(image < threshold, added_image, image)
 
 
@@ -200,7 +200,7 @@ def contrast(image, factor):
   hist = tf.histogram_fixed_width(degenerate, [0, 255], nbins=256)
   mean = tf.reduce_sum(tf.cast(hist, tf.float32)) / 256.0
   degenerate = tf.ones_like(degenerate, dtype=tf.float32) * mean
-  degenerate = tf.clip_by_value(degenerate, 0.0, 255.0)
+  degenerate = tf.clip_by_value(degenerate, 0, 255)
   degenerate = tf.image.grayscale_to_rgb(tf.cast(degenerate, tf.float32))
   return blend(degenerate, image, factor)
 
@@ -270,7 +270,7 @@ def autocontrast(image):
       scale = 255.0 / (hi - lo)
       offset = -lo * scale
       im = tf.cast(im,tf.float32) * scale + offset
-      im = tf.clip_by_value(im, 0.0, 255.0)
+      im = tf.clip_by_value(im, 0, 255)
       return tf.cast(im, tf.float32)
 
     result = tf.cond(hi > lo, lambda: scale_values(image), lambda: image)
@@ -300,7 +300,7 @@ def sharpness(image, factor):
   strides = [1, 1, 1, 1]
   degenerate = tf.nn.depthwise_conv2d(
       image, kernel, strides, padding='VALID', rate=[1, 1])
-  degenerate = tf.clip_by_value(degenerate, 0.0, 255.0)
+  degenerate = tf.clip_by_value(degenerate, 0, 255)
   degenerate = tf.squeeze(tf.cast(degenerate, tf.float32), [0])
 
   # For the borders of the resulting image, fill in the values of the
@@ -335,7 +335,7 @@ def equalize(image):
       lut = tf.concat([[0], lut[:-1]], 0)
       # Clip the counts to be in range.  This is done
       # in the C code for image.point.
-      return tf.clip_by_value(lut, 0.0, 255.0)
+      return tf.clip_by_value(lut, 0, 255)
 
     # If step is zero, return the original image.  Otherwise, build
     # lut from the full histogram and step and then index from it.
