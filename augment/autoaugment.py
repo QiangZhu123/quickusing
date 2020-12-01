@@ -86,11 +86,11 @@ def blend(image1, image2, factor):
   between the two pixel values, and we clip the results to values
   between 0 and 255.
   Args:
-    image1: An image Tensor of type uint8.
-    image2: An image Tensor of type uint8.
+    image1: An image Tensor of type float32.
+    image2: An image Tensor of type float32.
     factor: A floating point value above 0.0.
   Returns:
-    A blended image Tensor of type uint8.
+    A blended image Tensor of type float32.
   """
   if factor == 0.0:
     return tf.convert_to_tensor(image1)
@@ -109,12 +109,12 @@ def blend(image1, image2, factor):
   # Interpolate
   if factor > 0.0 and factor < 1.0:
     # Interpolation means we always stay within 0 and 255.
-    return tf.cast(temp, tf.uint8)
+    return tf.cast(temp, tf.float32)
 
   # Extrapolate:
   #
   # We need to clip and then cast.
-  return tf.cast(tf.clip_by_value(temp, 0.0, 255.0), tf.uint8)
+  return tf.cast(tf.clip_by_value(temp, 0.0, 255.0), tf.float32)
 
 
 def cutout(image, pad_size, replace=0):
@@ -178,7 +178,7 @@ def solarize_add(image, addition=0, threshold=128):
   # pixel value to be between 0 and 255. The value
   # of 'addition' is between -128 and 128.
   added_image = tf.cast(image, tf.int64) + addition
-  added_image = tf.cast(tf.clip_by_value(added_image, 0, 255), tf.uint8)
+  added_image = tf.cast(tf.clip_by_value(added_image, 0, 255), tf.float32)
   return tf.where(image < threshold, added_image, image)
 
 
@@ -201,7 +201,7 @@ def contrast(image, factor):
   mean = tf.reduce_sum(tf.cast(hist, tf.float32)) / 256.0
   degenerate = tf.ones_like(degenerate, dtype=tf.float32) * mean
   degenerate = tf.clip_by_value(degenerate, 0.0, 255.0)
-  degenerate = tf.image.grayscale_to_rgb(tf.cast(degenerate, tf.uint8))
+  degenerate = tf.image.grayscale_to_rgb(tf.cast(degenerate, tf.float32))
   return blend(degenerate, image, factor)
 
 
@@ -271,7 +271,7 @@ def autocontrast(image):
       offset = -lo * scale
       im = tf.to_float(im) * scale + offset
       im = tf.clip_by_value(im, 0.0, 255.0)
-      return tf.cast(im, tf.uint8)
+      return tf.cast(im, tf.float32)
 
     result = tf.cond(hi > lo, lambda: scale_values(image), lambda: image)
     return result
@@ -301,7 +301,7 @@ def sharpness(image, factor):
   degenerate = tf.nn.depthwise_conv2d(
       image, kernel, strides, padding='VALID', rate=[1, 1])
   degenerate = tf.clip_by_value(degenerate, 0.0, 255.0)
-  degenerate = tf.squeeze(tf.cast(degenerate, tf.uint8), [0])
+  degenerate = tf.squeeze(tf.cast(degenerate, tf.float32), [0])
 
   # For the borders of the resulting image, fill in the values of the
   # original image.
@@ -343,7 +343,7 @@ def equalize(image):
                      lambda: im,
                      lambda: tf.gather(build_lut(histo, step), im))
 
-    return tf.cast(result, tf.uint8)
+    return tf.cast(result, tf.float32)
 
   # Assumes RGB for now.  Scales each channel independently
   # and then stacks the result.
