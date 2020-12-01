@@ -633,7 +633,7 @@ def distort_image_with_randaugment(image, num_layers, magnitude,policy=None):
     The augmented version of `image`.
   """
   replace_value = [128] * 3
-  tf.logging.info('Using RandAug.')
+  #tf.logging.info('Using RandAug.')
   augmentation_hparams = dict(cutout_const=40, translate_const=100)
   if policy==None:
     available_ops = [
