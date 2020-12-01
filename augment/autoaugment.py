@@ -618,7 +618,7 @@ def distort_image_with_autoaugment(image, augmentation_name):
   return build_and_apply_nas_policy(policy, image, augmentation_hparams)
 
 
-def distort_image_with_randaugment(image, num_layers, magnitude):
+def distort_image_with_randaugment(image, num_layers, magnitude,policy=None):
   """Applies the RandAugment policy to `image`.
   RandAugment is from the paper https://arxiv.org/abs/1909.13719,
   Args:
@@ -635,11 +635,14 @@ def distort_image_with_randaugment(image, num_layers, magnitude):
   replace_value = [128] * 3
   tf.logging.info('Using RandAug.')
   augmentation_hparams = dict(cutout_const=40, translate_const=100)
-  available_ops = [
+  if policy==None:
+    available_ops = [
       'AutoContrast', 'Equalize', 'Invert', 'Rotate', 'Posterize',
       'Solarize', 'Color', 'Contrast', 'Brightness', 'Sharpness',
       'ShearX', 'ShearY', 'TranslateX', 'TranslateY', 'Cutout', 'SolarizeAdd']
-
+  else:
+    available_ops = policy
+  
   for layer_num in range(num_layers):
     op_to_select = tf.random_uniform(
         [], maxval=len(available_ops), dtype=tf.int32)
