@@ -97,14 +97,14 @@ def blend(image1, image2, factor):
   if factor == 1.0:
     return tf.convert_to_tensor(image2)
 
-  image1 = tf.to_float(image1)
-  image2 = tf.to_float(image2)
+  image1 = tf.cast(image1,tf.float32)
+  image2 = tf.cast(image2,tf.float32)
 
   difference = image2 - image1
   scaled = factor * difference
 
   # Do addition in float.
-  temp = tf.to_float(image1) + scaled
+  temp = tf.cast(image1,tf.float32) + scaled
 
   # Interpolate
   if factor > 0.0 and factor < 1.0:
@@ -262,14 +262,14 @@ def autocontrast(image):
     # A possibly cheaper version can be done using cumsum/unique_with_counts
     # over the histogram values, rather than iterating over the entire image.
     # to compute mins and maxes.
-    lo = tf.to_float(tf.reduce_min(image))
-    hi = tf.to_float(tf.reduce_max(image))
+    lo = tf.cast(tf.reduce_min(image),tf.float32)
+    hi = tf.cast(tf.reduce_max(image),tfl.float32)
 
     # Scale the image, making the lowest value 0 and the highest value 255.
     def scale_values(im):
       scale = 255.0 / (hi - lo)
       offset = -lo * scale
-      im = tf.to_float(im) * scale + offset
+      im = tf.cast(im,tf.float32) * scale + offset
       im = tf.clip_by_value(im, 0.0, 255.0)
       return tf.cast(im, tf.float32)
 
@@ -425,7 +425,7 @@ NAME_TO_FUNC = {
 def _randomly_negate_tensor(tensor):
   """With 50% prob turn the tensor negative."""
   should_flip = tf.cast(tf.floor(tf.random.uniform([]) + 0.5), tf.bool)
-  final_tensor = tf.cond(should_flip, lambda: tensor, lambda: -tensor)
+  final_tensor = tf.compat.v1.cond(should_flip, lambda: tensor, lambda: -tensor)
   return final_tensor
 
 
@@ -537,7 +537,7 @@ def select_and_apply_random_policy(policies, image):
   # Note that using tf.case instead of tf.conds would result in significantly
   # larger graphs and would even break export for some larger policies.
   for (i, policy) in enumerate(policies):
-    image = tf.cond(
+    image = tf.compat.v1.cond(
         tf.equal(i, policy_to_select),
         lambda selected_policy=policy: selected_policy(image),
         lambda: image)
@@ -652,7 +652,7 @@ def distort_image_with_randaugment(image, num_layers, magnitude,policy=None):
         prob = tf.random.uniform([], minval=0.2, maxval=0.8, dtype=tf.float32)
         func, _, args = _parse_policy_info(op_name, prob, random_magnitude,
                                            replace_value, augmentation_hparams)
-        image = tf.cond(
+        image = tf.compat.v1.cond(
             tf.equal(i, op_to_select),
             # pylint:disable=g-long-lambda
             lambda selected_func=func, selected_args=args: selected_func(
