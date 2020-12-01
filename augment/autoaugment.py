@@ -263,7 +263,7 @@ def autocontrast(image):
     # over the histogram values, rather than iterating over the entire image.
     # to compute mins and maxes.
     lo = tf.cast(tf.reduce_min(image),tf.float32)
-    hi = tf.cast(tf.reduce_max(image),tfl.float32)
+    hi = tf.cast(tf.reduce_max(image),tf.float32)
 
     # Scale the image, making the lowest value 0 and the highest value 255.
     def scale_values(im):
