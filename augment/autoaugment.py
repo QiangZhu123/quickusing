@@ -24,7 +24,7 @@ import inspect
 import math
 import tensorflow as tf
 
-import tensorflow_addons tfa
+import tensorflow_addons as tfa
 
 # This signifies the max integer that the controller RNN could predict for the
 # augmentation scheme.
