@@ -97,14 +97,14 @@ def blend(image1, image2, factor):
   if factor == 1.0:
     return tf.convert_to_tensor(image2)
 
-  image1 = tf.to_float(image1)
-  image2 = tf.to_float(image2)
+  image1 = tf.cast(image1,tf.float32)
+  image2 = tf.cast(image2,tf.float32)
 
   difference = image2 - image1
   scaled = factor * difference
 
   # Do addition in float.
-  temp = tf.to_float(image1) + scaled
+  temp = tf.cast(image1,tf.float32) + scaled
 
   # Interpolate
   if factor > 0.0 and factor < 1.0:
