@@ -645,7 +645,7 @@ def distort_image_with_autoaugment(image, augmentation_name):
   return build_and_apply_nas_policy(policy, image, augmentation_hparams)
 
 
-def distort_image_with_randaugment(image, num_layers, magnitude):
+def distort_image_with_randaugment(image, num_layers, magnitude,policy=None):
   """Applies the RandAugment policy to `image`.
   RandAugment is from the paper https://arxiv.org/abs/1909.13719,
   Args:
