@@ -218,17 +218,7 @@ def posterize(image, bits):
 
 
 def rotate(image, degrees, replace):
-  """Rotates the image by degrees either clockwise or counterclockwise.
-  Args:
-    image: An image Tensor of type uint8.
-    degrees: Float, a scalar angle in degrees to rotate all images by. If
-      degrees is positive the image will be rotated clockwise otherwise it will
-      be rotated counterclockwise.
-    replace: A one or three value 1D tensor to fill empty pixels caused by
-      the rotate operation.
-  Returns:
-    The rotated version of image.
-  """
+
   # Convert from degrees to radians.
   degrees_to_radians = math.pi / 180.0
   radians = degrees * degrees_to_radians
@@ -236,42 +226,39 @@ def rotate(image, degrees, replace):
   # In practice, we should randomize the rotation degrees by flipping
   # it negatively half the time, but that's done on 'degrees' outside
   # of the function.
-  image = tfa.image.rotate(wrap(image), radians)
-  return unwrap(image, replace)
+  image = tfa.image.rotate(image, radians)
+  return image
 
 
 def translate_x(image, pixels, replace):
   """Equivalent of PIL Translate in X dimension."""
-  image = tfa.image.translate_xy(wrap(image), [-pixels,0],0)
-  return unwrap(image, replace)
+  return return tfa.image.translate_xy(image,[pixels,0],replace)
 
 
 def translate_y(image, pixels, replace):
   """Equivalent of PIL Translate in Y dimension."""
-  image = tfa.image.translate_xy(wrap(image), [0,-pixels],0)
-  return unwrap(image, replace)
+
+  return tfa.image.translate_xy(image,[0,pixels],replace)
 
 
-def shear_x(image, level, replace):
+def shear_x(image, level):
   """Equivalent of PIL Shearing in X dimension."""
   # Shear parallel to x axis is a projective transform
   # with a matrix form of:
   # [1  level
   #  0  1].
-  image = tfa.image.transform(
-      wrap(image), [1., level, 0., 0., 1., 0., 0., 0.])
-  return unwrap(image, replace)
+  return image = tfa.image.transform(image, [1., level, 0., 0., 1., 0., 0., 0.])
+ 
 
 
-def shear_y(image, level, replace):
+def shear_y(image, level):
   """Equivalent of PIL Shearing in Y dimension."""
   # Shear parallel to y axis is a projective transform
   # with a matrix form of:
   # [1  0
   #  level  1].
-  image = tfa.image.transform(
-      wrap(image), [1., 0., 0., level, 1., 0., 0., 0.])
-  return unwrap(image, replace)
+  image = tfa.image.transform(image, [1., 0., 0., level, 1., 0., 0., 0.])
+  return image
 
 
 def autocontrast(image):
