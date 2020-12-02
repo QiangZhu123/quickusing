@@ -662,11 +662,13 @@ def distort_image_with_randaugment(image, num_layers, magnitude,policy=None):
   replace_value = [128] * 3
   #tf.logging.info('Using RandAug.')
   augmentation_hparams = dict(cutout_const=40, translate_const=100)
-  available_ops = [
-      'AutoContrast', 'Equalize', 'Invert', 'Rotate', 'Posterize',
-      'Solarize', 'Color', 'Contrast', 'Brightness', 'Sharpness',
-      'ShearX', 'ShearY', 'TranslateX', 'TranslateY', 'Cutout', 'SolarizeAdd']
-
+  if policy==None:
+    available_ops = [
+        'AutoContrast', 'Equalize', 'Invert', 'Rotate', 'Posterize',
+        'Solarize', 'Color', 'Contrast', 'Brightness', 'Sharpness',
+        'ShearX', 'ShearY', 'TranslateX', 'TranslateY', 'Cutout', 'SolarizeAdd']
+  else:
+    available_ops = policy
   for layer_num in range(num_layers):
     op_to_select = tf.random.uniform(
         [], maxval=len(available_ops), dtype=tf.int32)
