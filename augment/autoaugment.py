@@ -232,7 +232,7 @@ def rotate(image, degrees, replace):
 
 def translate_x(image, pixels, replace):
   """Equivalent of PIL Translate in X dimension."""
-  return return tfa.image.translate_xy(image,[pixels,0],replace)
+  return tfa.image.translate_xy(image,[pixels,0],replace)
 
 
 def translate_y(image, pixels, replace):
