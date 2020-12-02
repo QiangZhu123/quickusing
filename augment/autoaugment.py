@@ -247,7 +247,7 @@ def shear_x(image, level):
   # with a matrix form of:
   # [1  level
   #  0  1].
-  return image = tfa.image.transform(image, [1., level, 0., 0., 1., 0., 0., 0.])
+  return tfa.image.transform(image, [1., level, 0., 0., 1., 0., 0., 0.])
  
 
 
